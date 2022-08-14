@@ -1,5 +1,6 @@
-package com.grocery
+package com.grocery.ui.splash
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
@@ -8,7 +9,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -24,50 +28,39 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.grocery.R
+import com.grocery.ui.main.MainActivity
 import com.grocery.ui.theme.GroceryTheme
 import kotlinx.coroutines.delay
 
-class MainActivity : ComponentActivity() {
+class SplashActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             GroceryTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Navigation()
+                    SplashScreen { openMainActivity() }
                 }
             }
         }
     }
-}
 
-@Composable
-fun Navigation() {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "splash_screen") {
-        composable("splash_screen") {
-            SplashScreen(navController)
-        }
-        composable("main_screen") {
-            MainScreen()
-        }
+    private fun openMainActivity() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 }
 
 @Composable
-fun SplashScreen(navController: NavController) {
+fun SplashScreen(action: () -> Unit) {
     val scale = remember {
         Animatable(0f)
     }
-    LaunchedEffect(key1 = true ) {
+    LaunchedEffect(key1 = true) {
         scale.animateTo(
             targetValue = 1f,
             animationSpec = tween(
@@ -78,14 +71,9 @@ fun SplashScreen(navController: NavController) {
             )
         )
         delay(1500L)
-        navController.navigate("main_screen") {
-            popUpTo("splash_screen") {
-                inclusive = true
-            }
-        }
+        action.invoke()
     }
-    val systemUIController = rememberSystemUiController()
-    systemUIController.setSystemBarsColor(colorResource(id = R.color.orange))
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,17 +96,5 @@ fun SplashScreen(navController: NavController) {
                 .padding(0.dp, 38.dp, 0.dp, 0.dp)
                 .scale(scale.value)
         )
-    }
-}
-
-@Composable
-fun MainScreen() {
-    val systemUIController = rememberSystemUiController()
-    systemUIController.setSystemBarsColor(colorResource(id = R.color.white))
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "Home Screen")
     }
 }
